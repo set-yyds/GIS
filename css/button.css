@@ -1,0 +1,137 @@
+@import url('https://at.alicdn.com/t/c/font_4911261_mdgx6sopejm.css');
+
+.control-panel {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 增加为6列，水平方向更长 */
+    gap: 15px;
+    z-index: 9999;
+    padding: 12px 18px; /* 适当增加左右内边距，配合延长效果 */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 123, 255, 0.3);
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(0, 32, 64, 0.8),
+        rgba(0, 123, 255, 0.2)
+    );
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.15);
+    padding: 0;
+}
+
+.control-btn i {
+    font-size: 24px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.btn-text {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.control-btn.has-text {
+    width: auto;
+    padding: 0 15px;
+    height: auto;
+    min-height: 60px;
+}
+
+.control-btn.has-text .btn-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.control-btn i {
+    font-size: 25px;
+    color: rgba(255, 255, 255, 0.9);
+    width: 1em;
+    height: 1em;
+}
+
+.status-indicator {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    animation: pulse 2s infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.control-btn.active .status-indicator {
+    background: green;
+    opacity: 1;
+}
+
+.control-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(0, 123, 255, 0.3);
+}
+
+.control-btn.active {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: linear-gradient(
+        135deg,
+        rgba(0, 123, 255, 0.2) 0%,
+        rgba(0, 32, 64, 0.2) 100%
+    );
+    gap: 12px;
+}
+
+.control-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.6; }
+}
+
+@media (max-width: 768px) {
+    .control-panel {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .control-btn {
+        width: 50px;
+        height: 50px;
+    }
+}

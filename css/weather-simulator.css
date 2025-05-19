@@ -1,0 +1,259 @@
+/* 天气模拟按钮样式 */
+.control-btn {
+  position: relative;
+  padding: 8px 12px;
+  background: rgba(24, 37, 51, 0.8);
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.status-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+  transition: all 0.2s;
+}
+
+.status-indicator.active {
+  background: #4caf50;
+}
+
+/* 天气模拟面板样式 */
+.weather-simulator-panel {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  background: rgba(24, 37, 51, 0.98);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  width: 320px;
+  padding: 20px;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.weather-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.weather-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.weather-option:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.weather-option i {
+  font-size: 28px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.weather-option span {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 天气效果样式 */
+.weather-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.raindrop {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background: linear-gradient(to bottom, transparent, #4fc3f7);
+  border-radius: 0 0 2px 2px;
+  animation: rain-fall linear infinite;
+  top: -20px;
+}
+
+@keyframes rain-fall {
+  to {
+    transform: translateY(calc(100vh + 20px));
+  }
+}
+
+.snowflake {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  filter: blur(0.5px);
+  animation: snow-fall linear infinite;
+  top: -10px;
+}
+
+@keyframes snow-fall {
+  to {
+    transform: translateY(calc(100vh + 10px)) rotate(360deg);
+  }
+}
+
+.hailstone {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 5px white;
+  animation: hail-fall linear infinite;
+  top: -10px;
+}
+
+@keyframes hail-fall {
+  to {
+    transform: translateY(calc(100vh + 10px));
+  }
+}
+
+.sun {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #ffeb3b, #ffc107);
+  border-radius: 50%;
+  box-shadow: 0 0 40px #ffeb3b;
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+
+.sun-ray {
+  position: absolute;
+  width: 8px;
+  height: 40px;  /* 加长光线 */
+  background: linear-gradient(to bottom, #ffeb3b, rgba(255, 235, 59, 0.5));
+  left: 50%;
+  top: -40px;
+  transform-origin: 50% 100%;
+  border-radius: 4px;
+  box-shadow: 0 0 10px #ffeb3b;
+}
+
+/* 添加太阳脉动动画 */
+@keyframes sun-pulse {
+  0%, 100% {
+    box-shadow: 0 0 40px #ffeb3b;
+  }
+  50% {
+    box-shadow: 0 0 60px #ffeb3b;
+  }
+}
+
+/* 添加光线闪烁效果 */
+@keyframes ray-flicker {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 雾天效果样式 */
+.fog-particle {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  filter: blur(15px);
+  animation: fog-move linear infinite;
+  top: -120px;
+}
+
+.fog-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+}
+
+@keyframes fog-move {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(calc(100vh + 120px)) translateX(calc(50vw * var(--direction)));
+    opacity: 0.2;
+  }
+}
+
+.weather-simulator-panel {
+  z-index: 99999; /* 提高层级 */
+}
+  /* 临时添加调试边框 */
+.weather-simulator-panel.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 添加通用拖动样式 */
+.weather-simulator-panel .panel-header,
+.weather-panel .panel-header {
+  cursor: grab;
+  user-select: none;
+}
+
+.weather-simulator-panel .panel-header:active,
+.weather-panel .panel-header:active {
+  cursor: grabbing;
+}

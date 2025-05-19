@@ -1,0 +1,5 @@
+*.zip
+/cesium-demo-master/
+/image/
+download-skybox.js
+/node_modules/

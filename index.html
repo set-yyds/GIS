@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>旅游景区三维可视化平台</title>
+  <link href="/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
+  <script src="/Cesium/Cesium.js"></script>
+  <script src="/jsfile/cesium-measure.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script type="module">
+    import { initDataCharts } from '/jsfile/data.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      initDataCharts();
+    });
+  </script>
+  <script type="module" src="/jsfile/click.js"></script>
+  <script type="module" src="/jsfile/initviewer.js"></script>
+  <script type="module" src="/jsfile/model.js"></script>
+  <script type="module" src="/jsfile/weather.js"></script>
+  <script type="module" src="/jsfile/weather-simulator.js"></script>
+  <script type="module" src="/jsfile/gis-panel.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body,
+    #viewer-container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .layui-card {
+      position: absolute;
+      top: 10px;
+      left: 5px;
+      background-color: #ffffff6b;
+      box-shadow: inset 1px 2px 2px 0 #f2f6fc;
+      color: white;
+    }
+
+    .weather-panel {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: rgba(24, 37, 51, 0.95);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      color: #fff;
+      width: 280px;
+      z-index: 9998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .weather-panel.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .weather-search {
+      display: flex;
+      padding: 10px 16px 0 16px;
+      gap: 8px;
+    }
+
+    .weather-search input {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: none;
+      outline: none;
+    }
+
+    .weather-search button {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: none;
+      background: #4caf50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .weather-icon {
+      font-size: 32px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* 新增图标字体 */
+    @font-face {
+      font-family: 'iconfont';
+      src: url('//at.alicdn.com/t/font_2267418_0b3g7fgwqecp.woff2') format('woff2'),
+        url('//at.alicdn.com/t/font_2267418_0b3g7fgwqecp.woff') format('woff');
+    }
+
+    .iconfont {
+      font-family: "iconfont" !important;
+      font-size: 16px;
+      font-style: normal;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .icon-dashboard:before {
+      content: "\e78b";
+    }
+
+    .icon-map:before {
+      content: "\e60d";
+    }
+
+    .icon-refresh:before {
+      content: "\e650";
+    }
+
+    .d3-tooltip {
+      font-size: 14px;
+      min-width: 80px;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .map-container {
+      width: 100%;
+      height: 100%;
+      min-width: 300px;
+      min-height: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="viewer-container"></div>
+  <div class="control-panel">
+    <!-- 带状态指示的按钮 -->
+    <button id="earth-rotation-btn" class="control-btn" data-function="earth-rotation">
+      <i class="iconfont icon-globe_"></i>
+      <span class="btn-text">地球自转</span>
+      <div class="status-indicator"></div>
+    </button>
+
+    <button id="map-measure" class="control-btn">
+      <i class="iconfont icon-celiang-"></i>
+      <span class="btn-text">地图量测</span>
+      <div class="status-indicator"></div>
+    </button>
+
+    <button id="load-model" class="control-btn">
+      <i class="iconfont icon-A-moxingku"></i>
+      <span class="btn-text">加载模型</span>
+      <div class="status-indicator"></div>
+    </button>
+
+    <button id="season-change" class="control-btn">
+      <i class="iconfont icon-jijiemoshi"></i>
+      <span class="btn-text">天气模拟</span>
+      <div class="status-indicator"></div>
+    </button>
+    <button id="weather" class="control-btn">
+      <i class="iconfont icon-tianqi"></i>
+      <span class="btn-text">天气预报</span>
+      <div class="status-indicator"></div>
+    </button>
+    <button id="data" class="control-btn">
+      <i class="iconfont icon-dashujutubiao"></i>
+      <span class="btn-text">数据面板</span>
+      <div class="status-indicator"></div>
+      <div class="btn-glow"></div>
+    </button>
+    <button id="gis-analysis" class="control-btn">
+      <i class="iconfont icon-geometry"></i>
+      <span class="btn-text">GIS分析</span>
+      <div class="status-indicator"></div>
+      <div class="btn-glow"></div>
+    </button>
+  </div>
+
+  <div id="coordinate-display"
+    style="position:fixed; right:20px; bottom:80px; background:rgba(255,255,255,0.9); padding:8px; border-radius:4px;">
+  </div>
+
+  <!-- 天气面板（样式参考measure.css） -->
+  <div class="weather-panel" id="weather-panel">
+    <div class="panel-header">
+      <h3>天气预报</h3>
+      <button class="close-btn">×</button>
+    </div>
+    <div class="weather-search">
+      <input type="text" id="weather-city-input" placeholder="输入城市名，如北京" />
+      <button id="weather-search-btn">查询</button>
+    </div>
+    <div class="forecast-list" id="forecast-list"></div>
+  </div>
+
+  <div class="weather-dashboard">
+    <div class="weather-header">
+      <span id="weather-date"></span>
+      <span id="weather-week"></span>
+    </div>
+    <div class="weather-main">
+      <div class="weather-date-circle">
+        <div class="date-day" id="date-day"></div>
+        <div class="date-month" id="date-month"></div>
+        <div class="date-year" id="date-year"></div>
+      </div>
+      <div class="weather-info-cards">
+        <div class="info-card">
+          <div class="info-icon thermometer"></div>
+          <div class="info-value" id="weather-temp"></div>
+          <div class="info-label">温度</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon weather"></div>
+          <div class="info-value" id="weather-desc"></div>
+          <div class="info-label">天气</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon wind"></div>
+          <div class="info-value" id="weather-wind"></div>
+          <div class="info-label">风速</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon humidity"></div>
+          <div class="info-value" id="weather-humidity"></div>
+          <div class="info-label">湿度</div>
+        </div>
+      </div>
+    </div>
+    <div class="weather-time" id="weather-time"></div>
+  </div>
+
+  <!-- 天气模拟面板 -->
+  <div class="weather-simulator-panel" id="weather-simulator-panel">
+    <div class="panel-header">
+      <h3>天气模拟</h3>
+      <button class="close-btn">×</button>
+    </div>
+    <div class="weather-options">
+      <div class="weather-option" data-weather="rain">
+        <i class="iconfont icon-yu"></i>
+        <span>雨天</span>
+      </div>
+      <div class="weather-option" data-weather="snow">
+        <i class="iconfont icon-xue"></i>
+        <span>雪天</span>
+      </div>
+      <div class="weather-option" data-weather="hail">
+        <i class="iconfont icon-bingbao"></i>
+        <span>冰雹</span>
+      </div>
+      <div class="weather-option" data-weather="fog">
+        <i class="iconfont icon-wu"></i>
+        <span>雾天</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 地球自转 -->
+  <script type="module">
+    import { viewer } from '/jsfile/initviewer.js';
+    import { MapRotationController } from '/jsfile/map-rotation.js';
+
+    // 初始化旋转控制器
+    const rotationController = new MapRotationController(viewer);
+
+    // 绑定地球自转按钮事件
+    const rotationBtn = document.getElementById('earth-rotation-btn');
+    rotationBtn.addEventListener('click', () => {
+      const isActive = rotationBtn.classList.toggle('active');
+      const success = rotationController.toggleRotation();
+
+      // 更新状态指示
+      rotationBtn.querySelector('.status-indicator').style.backgroundColor =
+        isActive ? '#52c41a' : '#8c8c8c';
+
+      // 失败时回滚状态
+      if (success !== isActive) {
+        rotationBtn.classList.toggle('active');
+      }
+    });
+
+    // 添加地图点击事件监听
+    viewer.screenSpaceEventHandler.setInputAction(() => {
+      if (rotationController.isRotating) {
+        rotationController.stopRotation();
+        rotationBtn.classList.remove('active');
+        rotationBtn.querySelector('.status-indicator').style.backgroundColor = '#8c8c8c';
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  </script>
+
+  <!-- 测量功能 -->
+  <script type="module">
+    import { MeasurementTool } from '/jsfile/measurement.js';
+    import { viewer } from '/jsfile/initviewer.js';
+    const measurement = new MeasurementTool(viewer);
+    const measureBtn = document.getElementById('map-measure');
+    if (measureBtn) {
+      measureBtn.addEventListener('click', () => {
+        measurement.panel.classList.add('active');
+        measureBtn.classList.add('active');
+        measureBtn.querySelector('.status-indicator').style.backgroundColor = '#52c41a';
+      });
+    }
+    // 关闭面板时同步按钮状态
+    if (measurement.panel) {
+      const closeBtn = measurement.panel.querySelector('.icon-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          measurement.panel.classList.remove('active');
+          measureBtn.classList.remove('active');
+          measureBtn.querySelector('.status-indicator').style.backgroundColor = '#8c8c8c';
+        });
+      }
+    }
+  </script>
+
+  <!-- 加载模型 -->
+  <script type="module">
+    import { viewer } from '/jsfile/initviewer.js';
+    import { loadModel, removeModel } from '/jsfile/model.js';
+
+    const loadModelBtn = document.getElementById('load-model');
+    loadModelBtn.addEventListener('click', () => {
+      const isActive = loadModelBtn.classList.toggle('active');
+
+      if (isActive) {
+        // 加载模型
+        loadModel(viewer).then((model) => {
+          loadModelBtn.querySelector('.status-indicator').style.backgroundColor = '#52c41a';
+        }).catch((error) => {
+          console.error('Failed to load model:', error);
+          loadModelBtn.classList.remove('active');
+          loadModelBtn.querySelector('.status-indicator').style.backgroundColor = '#8c8c8c';
+        });
+      } else {
+        // 移除模型
+        removeModel(viewer);
+        loadModelBtn.querySelector('.status-indicator').style.backgroundColor = '#8c8c8c';
+      }
+    });
+  </script>
+
+  <script type="module">
+    async function renderWeather(cityCode) {
+      const { now, daily } = await WeatherController.getWeatherForecast(cityCode);
+      const icon = weatherIcons[now.weather] || (daily[0] ? weatherIcons[daily[0].dayweather] : '❓') || '❓';
+      // 今天日期和星期
+      let todayDate = '', todayWeek = '';
+      if (daily && daily.length > 0) {
+        todayDate = daily[0].date;
+        todayWeek = daily[0].week;
+      }
+      // 兜底显示
+      const mainWeather = now.weather || (daily[0] && daily[0].dayweather) || '--';
+      const mainTemp = now.temperature || (daily[0] && daily[0].daytemp) || '--';
+      forecastList.innerHTML = `
+        <div class="current-weather-card">
+          <span class="weather-icon">${icon}</span>
+          <div class="city-name">${now.city || cityInput.value || ''}</div>
+          <div class="main-temp">${mainTemp ? mainTemp + '℃' : '--'}</div>
+          <div class="main-desc">${mainWeather || '--'}</div>
+          <div class="main-extra" style="margin-top:8px;font-size:15px;opacity:0.85;">${todayDate ? `${todayDate}（周${todayWeek}）` : ''}</div>
+        </div>
+      `;
+      // ...后面未来预报不变...
+    }
+  </script>
+  <script>
+    document.addEventListener('mousemove', (e) => {
+      const glow = document.createElement('div');
+      glow.className = 'mouse-glow';
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+      document.body.appendChild(glow);
+
+      setTimeout(() => glow.remove(), 500);
+    });
+  </script>
+</body>
+
+</html>

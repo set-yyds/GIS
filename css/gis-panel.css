@@ -1,0 +1,75 @@
+/* GIS分析主面板样式 */
+.gis-panel {
+  position: fixed;
+  top: 90px;
+  right: 40px;
+  width: 340px;
+  background: rgba(24, 37, 51, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,243,255,0.18), 0 2px 12px rgba(0,0,0,0.18);
+  color: #fff;
+  z-index: 10000;
+  padding: 0 0 18px 0;
+  font-family: 'Microsoft YaHei', Arial, sans-serif;
+  display: none;
+  flex-direction: column;
+  animation: fadeIn 0.3s;
+}
+.gis-panel.active { display: flex; }
+.gis-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px 0 22px;
+}
+.gis-panel h3 {
+  font-size: 20px;
+  color: #00f6ff;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 1.5px;
+}
+.gis-panel .icon-close {
+  background: none;
+  border: none;
+  color: #b6eaff;
+  font-size: 22px;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 2px 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.gis-panel .icon-close:hover {
+  color: #fff;
+  background: rgba(0,243,255,0.12);
+}
+.gis-panel .gis-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 22px 0 22px;
+}
+.gis-panel .gis-tab-btn {
+  flex: 1 1 0;
+  background: rgba(0,243,255,0.08);
+  border: 1.5px solid #00f6ff44;
+  color: #00f6ff;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.gis-panel .gis-tab-btn.active, .gis-panel .gis-tab-btn:hover {
+  background: #00f6ff;
+  color: #143861;
+  border: 1.5px solid #00f6ff;
+}
+.gis-panel .gis-content {
+  padding: 18px 22px 0 22px;
+  min-height: 180px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
