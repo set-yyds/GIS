@@ -478,6 +478,61 @@ function clearAll() {
 }
 
 // 状态显示更新
+// 状态显示更新
 function startStatusUpdates() {
   const updateInterval = setInterval(() => {
-    if (!
+    if (!floodState.animationHandle) {
+      clearInterval(updateInterval);
+      return;
+    }
+    updateDisplay();
+  }, 500);
+}
+
+function updateDisplay() {
+  document.getElementById("current-height").textContent =
+    floodState.currentHeight.toFixed(1);
+  document.getElementById("flood-area").textContent =
+    calculateTotalArea().toFixed(2);
+}
+
+// 计算总面积
+function calculateTotalArea() {
+  return floodState.entities.reduce((sum, entity) => {
+    try {
+      const polygon = entity.entity.polygon.hierarchy.getValue();
+      const area = Cesium.PolygonGeometry.computeArea(polygon.positions);
+      return sum + Math.abs(area) / 1e6; // 转换为平方公里
+    } catch {
+      return sum;
+    }
+  }, 0);
+}
+
+
+// 辅助函数
+function getCartesianPosition(screenPosition) {
+  const ray = viewer.camera.getPickRay(screenPosition);
+  return viewer.scene.globe.pick(ray, viewer.scene);
+}
+
+function getMaxHeight() {
+  return parseFloat(document.getElementById("max-height").value) || 50;
+}
+
+function getSpeed() {
+  return parseFloat(document.getElementById("speed").value) || 1;
+}
+
+function cleanupDrawing() {
+  if (floodState.drawing.tempEntity) {
+    viewer.entities.remove(floodState.drawing.tempEntity);
+    floodState.drawing.tempEntity = null;
+  }
+  if (floodState.drawing.handler) {
+    floodState.drawing.handler.destroy();
+    floodState.drawing.handler = null;
+  }
+  floodState.drawing.tempPositions = [];
+  floodState.drawing.isDrawing = false;
+}
